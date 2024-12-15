@@ -6,11 +6,8 @@ import { envInjector } from "./middlewares/envInjector.middleware";
 import userHandler from "./users/user.handler";
 import { HTTPException } from "hono/http-exception";
 import { NotFoundException } from "./libs/errors";
-import { PrismaNeon } from "@prisma/adapter-neon";
-import { PrismaClient } from "@prisma/client";
-import { Pool } from "@neondatabase/serverless";
-import userService from "./users/user.service";
 import userRepository from "./users/user.repository";
+import { dbService } from "./db/db.service";
 
 const app = new Hono<AppBindings>();
 
@@ -41,21 +38,14 @@ export default {
   fetch: app.fetch,
 
   async scheduled(controller: ScheduledController, env: AppBindings["Bindings"], ctx: ExecutionContext) {
-    // Write code for updating your API
-    const neon = new Pool({ connectionString: env.DATABASE_URL });
-    const adapter = new PrismaNeon(neon);
-    const dbService = new PrismaClient({ adapter, log: env.MODE === "development" ? ["query"] : undefined });
-    const userDb = dbService.user;
+    const userDb = dbService(env).user;
 
     switch (controller.cron) {
       case "0 0 * * *":
         // Every day 12am GMT+0
+        console.log(`cron ${controller.cron} triggered at ${new Date(controller.scheduledTime).toISOString()}`);
+        console.log(`resetting user table...`);
         await userRepository.resetTable(userDb);
-
-      case "*/10 * * * *":
-        // Every 10 mins
-        const users = await userRepository.getAll(userDb);
-        console.log(users);
     }
     console.log("cron processed");
   },
