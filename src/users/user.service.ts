@@ -1,7 +1,13 @@
 import { $Enums } from "@prisma/client";
 import { createHashedString, compareHash } from "../libs/crypto";
 import { AppBindings } from "../types";
-import { CreateUserDtoType, PostProcessedUpdateUserDtoType, UpdateUserDtoType, UserDb } from "./user.dto";
+import {
+  CreateUserDtoType,
+  PostProcessedUpdateUserDtoType,
+  ResetTableDto,
+  UpdateUserDtoType,
+  UserDb,
+} from "./user.dto";
 import userRepository from "./user.repository";
 import { BadRequestException, NotFoundException, UnauthorizedException } from "../libs/errors";
 
@@ -83,12 +89,22 @@ const assignRoleBasedOnSecret = async (input: string | undefined, hashedSecret: 
   }
 };
 
+const resetTable = async (userDb: UserDb, dto: ResetTableDto, env: AppBindings["Bindings"]) => {
+  const approved = await compareHash(dto.adminSecret, env.ADMIN_SIGNUP_SECRET as string);
+  if (approved) {
+    return await userRepository.resetTable(userDb);
+  } else {
+    throw new UnauthorizedException("Unauthorized action detected. You will be reported.");
+  }
+};
+
 export const userService = {
   getAll,
   getById,
   create,
   update,
   remove,
+  resetTable,
 };
 
 export default userService;

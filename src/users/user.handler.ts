@@ -3,6 +3,8 @@ import { zValidator } from "@hono/zod-validator";
 // import userService from "./user.service.js";
 import {
   CreateUserSchema,
+  ResetTableDto,
+  ResetTableSchema,
   UpdateUserDtoType,
   UpdateUserSchema,
   userParamSchema,
@@ -25,6 +27,14 @@ userHandler.post("", zValidator("json", CreateUserSchema), async ({ get, req, js
   const dto = (await req.json()) as CreateUserDtoType;
 
   return json(await userService.create(usersDb, dto, env));
+});
+
+userHandler.post("reset-table", zValidator("json", ResetTableSchema), async ({ get, req, json, env }) => {
+  const usersDb = get("prisma").user;
+
+  const dto = (await req.json()) as ResetTableDto;
+
+  return json(await userService.resetTable(usersDb, dto, env));
 });
 
 userHandler.get(":id", zValidator("param", userParamSchema), async ({ get, req, json }) => {

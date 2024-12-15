@@ -25,6 +25,14 @@ const remove = async (userDb: UserDb, id: string) => {
   return await userDb.delete({ where: { id }, omit: { hashedPassword: true } });
 };
 
+const resetTable = async (userDb: UserDb) => {
+  return await userDb.deleteMany({
+    where: {
+      email: { not: { in: ["admin@email.com"] } },
+    },
+  });
+};
+
 export const userRepository = {
   getAll,
   create,
@@ -32,6 +40,7 @@ export const userRepository = {
   findById,
   update,
   remove,
+  resetTable,
 };
 
 export default userRepository;

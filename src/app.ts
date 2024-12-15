@@ -6,6 +6,8 @@ import { envInjector } from "./middlewares/envInjector.middleware";
 import userHandler from "./users/user.handler";
 import { HTTPException } from "hono/http-exception";
 import { NotFoundException } from "./libs/errors";
+import userService from "./users/user.service";
+import { WorkerEntrypoint } from "cloudflare:workers";
 
 const app = new Hono<AppBindings>();
 

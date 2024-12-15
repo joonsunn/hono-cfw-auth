@@ -45,3 +45,9 @@ export type UserDb = Prisma.UserDelegate<DefaultArgs, Prisma.PrismaClientOptions
 export const userParamSchema = z.object({
   id: z.string().uuid(),
 });
+
+export const ResetTableSchema = z.object({
+  adminSecret: z.string(),
+});
+
+export type ResetTableDto = z.infer<typeof ResetTableSchema>;
