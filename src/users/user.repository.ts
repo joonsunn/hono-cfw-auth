@@ -2,7 +2,7 @@ import { PostProcessedCreateUserDtoType, PostProcessedUpdateUserDtoType, UserDb 
 import { UserEntity } from "./user.entity";
 
 const getAll = async (userDb: UserDb) => {
-  return (await userDb.findMany({ omit: { hashedPassword: true } })) as UserEntity[];
+  return (await userDb.findMany({ omit: { hashedPassword: true }, include: { token: true } })) as Partial<UserEntity>[];
 };
 
 const create = async (userDb: UserDb, dto: PostProcessedCreateUserDtoType) => {

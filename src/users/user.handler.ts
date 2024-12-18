@@ -16,9 +16,24 @@ import userService from "./user.service.js";
 const userHandler = new Hono<AppBindings>();
 
 userHandler.get("", async ({ get, json }) => {
-  const usersDb = get("prisma").user;
+  const userDb = get("drizzle").query.users;
 
-  return json(await userService.getAll(usersDb));
+  const allUsersWithTokens = await userDb.findMany({
+    with: {
+      tokens: true,
+    },
+    columns: {
+      id: true,
+      email: true,
+      role: true,
+    },
+  });
+
+  return json(allUsersWithTokens);
+
+  // const usersDb = get("prisma").user;
+
+  // return json(await userService.getAll(usersDb));
 });
 
 userHandler.post("", zValidator("json", CreateUserSchema), async ({ get, req, json, env }) => {

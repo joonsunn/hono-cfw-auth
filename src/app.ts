@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
-import { prisma } from "./middlewares/dbService.middleware";
+import { drizzle, prisma } from "./middlewares/dbService.middleware";
 import { AppBindings } from "./types";
 import { envInjector } from "./middlewares/envInjector.middleware";
 import userHandler from "./users/user.handler";
@@ -25,6 +25,7 @@ app.notFound((c) => {
 });
 
 app.use(prisma());
+app.use(drizzle());
 
 app.use(envInjector());
 
