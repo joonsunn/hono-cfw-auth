@@ -1,5 +1,4 @@
 import { HTTPException } from "hono/http-exception";
-import { HTTPResponseError } from "hono/types";
 
 export class BadRequestException extends HTTPException {
   constructor(message?: string) {

@@ -17,6 +17,10 @@ const adminFindById = async (userDb: UserDb, id: string) => {
   return await userDb.findUnique({ where: { id } });
 };
 
+const adminFindByEmail = async (userDb: UserDb, email: string) => {
+  return await userDb.findUnique({ where: { email } });
+};
+
 const update = async (userDb: UserDb, id: string, dto: PostProcessedUpdateUserDtoType) => {
   return await userDb.update({ where: { id }, data: dto, omit: { hashedPassword: true } });
 };
@@ -37,6 +41,7 @@ export const userRepository = {
   getAll,
   create,
   adminFindById,
+  adminFindByEmail,
   findById,
   update,
   remove,

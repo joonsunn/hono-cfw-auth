@@ -8,6 +8,7 @@ import { HTTPException } from "hono/http-exception";
 import { NotFoundException } from "./libs/errors";
 import userRepository from "./users/user.repository";
 import { dbService } from "./db/db.service";
+import authHandler from "./auth/auth.handler";
 
 const app = new Hono<AppBindings>();
 
@@ -15,7 +16,8 @@ app.use(logger());
 
 app.onError((error, c) => {
   if (error instanceof HTTPException) {
-    return c.text(`Error ${error.status}: ${error.message}`);
+    // return c.text(`Error ${error.status}: ${error.message}`);
+    return error.getResponse();
   }
   return c.text(JSON.stringify(error.message));
 });
@@ -33,6 +35,7 @@ app.get("/", (c) => {
 });
 
 app.route("/users", userHandler);
+app.route("/auth", authHandler);
 
 export default {
   fetch: app.fetch,

@@ -31,6 +31,14 @@ const adminGetById = async (userDb: UserDb, id: string) => {
   return user;
 };
 
+const adminGetByEmail = async (userDb: UserDb, email: string) => {
+  const user = await userRepository.adminFindByEmail(userDb, email);
+  if (!user) {
+    throw new NotFoundException(`User with email ${email} not found`);
+  }
+  return user;
+};
+
 const create = async (userDb: UserDb, dto: CreateUserDtoType, env: AppBindings["Bindings"]) => {
   const newDto = {
     ...dto,
@@ -101,6 +109,7 @@ const resetTable = async (userDb: UserDb, dto: ResetTableDto, env: AppBindings["
 export const userService = {
   getAll,
   getById,
+  adminGetByEmail,
   create,
   update,
   remove,
