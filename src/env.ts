@@ -5,6 +5,10 @@ const envSchema = z.object({
   ADMIN_SIGNUP_SECRET: z.string().optional(),
   PORT: z.coerce.number().default(3000),
   MODE: z.string().default("development"),
+  JWT_SECRET: z.string().default("secret"),
+  JWT_EXPIRY: z.coerce.number().default(300),
+  JWT_REFRESH_SECRET: z.string().default("secret"),
+  JWT_REFRESH_EXPIRY: z.coerce.number().default(3000),
 });
 
 export type Environment = z.infer<typeof envSchema>;

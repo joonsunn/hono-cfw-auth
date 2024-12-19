@@ -5,4 +5,5 @@ export class TokenEntity implements Token {
   createdAt!: Date;
   userId!: string;
   token!: string;
+  refreshToken!: string;
 }

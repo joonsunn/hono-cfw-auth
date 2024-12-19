@@ -28,9 +28,10 @@ model User {
 }
 
 model Token {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  token     String
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  token        String   @unique
+  refreshToken String   @unique
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

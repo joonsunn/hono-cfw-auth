@@ -9,6 +9,8 @@ import { NotFoundException } from "./libs/errors";
 import userRepository from "./users/user.repository";
 import { dbService } from "./db/db.service";
 import authHandler from "./auth/auth.handler";
+import tokenRepository from "./tokens/token.repository";
+import tokenHandler from "./tokens/token.handler";
 
 const app = new Hono<AppBindings>();
 
@@ -16,7 +18,6 @@ app.use(logger());
 
 app.onError((error, c) => {
   if (error instanceof HTTPException) {
-    // return c.text(`Error ${error.status}: ${error.message}`);
     return error.getResponse();
   }
   return c.text(JSON.stringify(error.message));
@@ -36,19 +37,26 @@ app.get("/", (c) => {
 
 app.route("/users", userHandler);
 app.route("/auth", authHandler);
+app.route("/tokens", tokenHandler);
 
 export default {
   fetch: app.fetch,
 
   async scheduled(controller: ScheduledController, env: AppBindings["Bindings"], ctx: ExecutionContext) {
-    const userDb = dbService(env).user;
+    const db = dbService(env);
+    const userDb = db.user;
+    const tokenDb = db.token;
 
     switch (controller.cron) {
       case "0 0 * * *":
         // Every day 12am GMT+0
         console.log(`cron ${controller.cron} triggered at ${new Date(controller.scheduledTime).toISOString()}`);
+
         console.log(`resetting user table...`);
-        await userRepository.resetTable(userDb);
+        console.log(await userRepository.resetTable(userDb));
+
+        console.log(`resetting token table...`);
+        console.log(await tokenRepository.resetTable({ tokenDb }));
     }
     console.log("cron processed");
   },
