@@ -12,6 +12,7 @@ import {
 } from "./user.dto.js";
 import { AppBindings } from "../types.js";
 import userService from "./user.service.js";
+import { exampleMiddleware } from "../middlewares/example.middleware.js";
 
 const userHandler = new Hono<AppBindings>();
 
@@ -36,6 +37,8 @@ userHandler.post("reset-table", zValidator("json", ResetTableSchema), async ({ g
 
   return json(await userService.resetTable(usersDb, dto, env));
 });
+
+userHandler.use(exampleMiddleware("colocated-middleware in userHandler for get user by id"));
 
 userHandler.get(":id", zValidator("param", userParamSchema), async ({ get, req, json }) => {
   const usersDb = get("prisma").user;

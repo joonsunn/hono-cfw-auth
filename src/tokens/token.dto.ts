@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { $Enums, Prisma } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 import { z } from "zod";
 
@@ -6,7 +6,7 @@ export type TokenDb = Prisma.TokenDelegate<DefaultArgs, Prisma.PrismaClientOptio
 
 export type JwtPayloadEntity = {
   sub: string;
-  iat: number;
+  role: $Enums.ROLE;
   exp: number;
 };
 

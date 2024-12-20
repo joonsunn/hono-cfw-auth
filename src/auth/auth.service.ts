@@ -22,13 +22,22 @@ export const login = async ({ usersDb, tokenDb, dto, env }: LoginProps) => {
     throw new UnauthorizedException("Invalid credentials");
   }
 
-  const tokens = await tokenService.create(tokenDb, { userId: user.id, role: user.role }, env);
+  const tokenId = await tokenService.create(tokenDb, { userId: user.id, role: user.role }, env);
 
-  return { email: user.email, role: user.role, ...tokens };
+  return { email: user.email, role: user.role, tokenId };
+};
+
+export const logout = async ({ tokenDb, tokenId }: { tokenDb: TokenDb; tokenId: string }) => {
+  return await tokenService.remove(tokenDb, tokenId);
+};
+
+export const logoutAll = async ({ tokenDb, userId }: { tokenDb: TokenDb; userId: string }) => {
+  return await tokenService.removeAll(tokenDb, userId);
 };
 
 export const authService = {
   login,
+  logout,
 };
 
 export default authService;

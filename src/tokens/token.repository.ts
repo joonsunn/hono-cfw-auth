@@ -13,6 +13,19 @@ export const getAll = async ({ tokenDb, userId }: TokenGetAllProps) => {
   });
 };
 
+type TokenGetPairProps = {
+  tokenDb: TokenDb;
+  tokenId: string;
+};
+
+export const getPair = async ({ tokenDb, tokenId }: TokenGetPairProps) => {
+  return await tokenDb.findFirst({
+    where: {
+      id: tokenId,
+    },
+  });
+};
+
 type TokenCreateProps = {
   tokenDb: TokenDb;
   token: string;
@@ -21,7 +34,7 @@ type TokenCreateProps = {
 };
 
 export const create = async ({ tokenDb, token, refreshToken, userId }: TokenCreateProps) => {
-  await tokenDb.create({
+  const tokenPair = await tokenDb.create({
     data: {
       userId,
       token,
@@ -29,36 +42,69 @@ export const create = async ({ tokenDb, token, refreshToken, userId }: TokenCrea
     },
   });
 
-  return { token, refreshToken };
+  return tokenPair.id;
+};
+
+type TokenUpdateProps = {
+  tokenDb: TokenDb;
+  tokenId: string;
+  token: string;
+  refreshToken: string;
+};
+
+export const update = async ({ tokenDb, tokenId, token, refreshToken }: TokenUpdateProps) => {
+  return await tokenDb.update({
+    where: {
+      id: tokenId,
+    },
+    data: {
+      token,
+      refreshToken,
+    },
+  });
 };
 
 type TokenRemoveProps = {
   tokenDb: TokenDb;
-  token: string;
+  tokenId: string;
 };
 
-export const remove = async ({ tokenDb, token }: TokenRemoveProps) => {
-  await tokenDb.deleteMany({
+export const remove = async ({ tokenDb, tokenId }: TokenRemoveProps) => {
+  return await tokenDb.delete({
     where: {
-      token,
+      id: tokenId,
     },
   });
-
-  return token;
 };
 
-type TokenRsetTableProps = {
+type TokenRemoveAllProps = {
+  tokenDb: TokenDb;
+  userId: string;
+};
+
+export const removeAll = async ({ tokenDb, userId }: TokenRemoveAllProps) => {
+  return await tokenDb.deleteMany({
+    where: {
+      userId,
+    },
+  });
+};
+
+type TokenResetTableProps = {
   tokenDb: TokenDb;
 };
 
-export const resetTable = async ({ tokenDb }: TokenRsetTableProps) => {
+export const resetTable = async ({ tokenDb }: TokenResetTableProps) => {
   return await tokenDb.deleteMany({});
 };
 
 export const tokenRepository = {
   getAll,
+  getPair,
   create,
+  update,
   remove,
+  removeAll,
   resetTable,
 };
 

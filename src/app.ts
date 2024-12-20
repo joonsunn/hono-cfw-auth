@@ -11,6 +11,8 @@ import { dbService } from "./db/db.service";
 import authHandler from "./auth/auth.handler";
 import tokenRepository from "./tokens/token.repository";
 import tokenHandler from "./tokens/token.handler";
+import { exampleMiddleware } from "./middlewares/example.middleware";
+import { authMiddleware } from "./middlewares/auth.middleware";
 
 const app = new Hono<AppBindings>();
 
@@ -35,9 +37,11 @@ app.get("/", (c) => {
   return c.text("Hello Hono!");
 });
 
-app.route("/users", userHandler);
 app.route("/auth", authHandler);
 app.route("/tokens", tokenHandler);
+
+app.use(authMiddleware());
+app.route("/users", userHandler);
 
 export default {
   fetch: app.fetch,
