@@ -1,5 +1,5 @@
 import { compareHash } from "../libs/crypto";
-import { UnauthorizedException } from "../libs/errors";
+import { BadRequestException, UnauthorizedException } from "../libs/errors";
 import { TokenDb } from "../tokens/token.dto";
 import tokenService from "../tokens/token.service";
 import { AppBindings } from "../types";
@@ -19,15 +19,19 @@ export const login = async ({ usersDb, tokenDb, dto, env }: LoginProps) => {
 
   const approved = await compareHash(dto.password, user.hashedPassword);
   if (!approved) {
-    throw new UnauthorizedException("Invalid credentials");
+    throw new BadRequestException("Invalid credentials");
   }
 
   const tokenId = await tokenService.create(tokenDb, { userId: user.id, role: user.role }, env);
 
-  return { email: user.email, role: user.role, tokenId };
+  return { id: user.id, email: user.email, role: user.role, tokenId };
 };
 
 export const logout = async ({ tokenDb, tokenId }: { tokenDb: TokenDb; tokenId: string }) => {
+  const existingPair = await tokenService.getPair(tokenDb, tokenId);
+  if (!existingPair) {
+    throw new UnauthorizedException("Credentials not found.");
+  }
   return await tokenService.remove(tokenDb, tokenId);
 };
 

@@ -28,7 +28,18 @@ const create = async (tokenDb: TokenDb, data: JwtDataDto, env: AppBindings["Bind
   const token = await sign(payload(env.JWT_EXPIRY), env.JWT_SECRET);
   const refreshToken = await sign(payload(env.JWT_REFRESH_EXPIRY), env.JWT_REFRESH_SECRET);
 
-  return await tokenRepository.create({ tokenDb, token, refreshToken, userId });
+  const newToken = await tokenRepository.create({ tokenDb, token, refreshToken, userId });
+
+  const existingTokens = await tokenRepository.getAll({ tokenDb, userId });
+
+  if (existingTokens.length >= env.MAX_TOKENS_PER_USER) {
+    await tokenRepository.prune({
+      tokenDb,
+      tokenIds: existingTokens.slice(0, env.MAX_TOKENS_PER_USER).map((t) => t.id),
+    });
+  }
+
+  return newToken.id;
 };
 
 const update = async (tokenDb: TokenDb, tokenId: string, token: string, refreshToken: string) => {
@@ -41,6 +52,10 @@ const remove = async (tokenDb: TokenDb, tokenId: string) => {
 
 const removeAll = async (tokenDb: TokenDb, userId: string) => {
   return await tokenRepository.removeAll({ tokenDb, userId });
+};
+
+const prune = async (tokenDb: TokenDb, tokenIds: string[]) => {
+  return await tokenRepository.prune({ tokenDb, tokenIds });
 };
 
 const resetTable = async (tokenDb: TokenDb, dto: ResetTableDto, env: AppBindings["Bindings"]) => {
@@ -97,6 +112,7 @@ export const tokenService = {
   update,
   remove,
   removeAll,
+  // prune,
   resetTable,
   verifyToken,
   isTokenExpired,

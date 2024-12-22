@@ -1,7 +1,7 @@
 import type { MiddlewareHandler } from "hono";
 import { createMiddleware } from "hono/factory";
 import type { AppBindings } from "../types";
-import { BadRequestException, UnauthorizedException } from "../libs/errors";
+import { UnauthorizedException } from "../libs/errors";
 import tokenService from "../tokens/token.service";
 import { TokenType } from "../tokens/token.constants";
 
@@ -10,7 +10,7 @@ export const authMiddleware = (): MiddlewareHandler<AppBindings> =>
     const bearerToken = req.header("Authorization");
 
     if (!bearerToken || !bearerToken.startsWith("Bearer ")) {
-      throw new BadRequestException("Credentials not found.");
+      throw new UnauthorizedException("Credentials not found.");
     }
 
     const tokenId = bearerToken.replace("Bearer ", "");
@@ -20,7 +20,7 @@ export const authMiddleware = (): MiddlewareHandler<AppBindings> =>
     const tokenPair = await tokenService.getPair(tokenDb, tokenId);
 
     if (!tokenPair) {
-      throw new BadRequestException("Credentials not found.");
+      throw new UnauthorizedException("Credentials not found.");
     }
 
     try {

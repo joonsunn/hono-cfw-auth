@@ -13,14 +13,9 @@ import {
 import { AppBindings } from "../types.js";
 import userService from "./user.service.js";
 import { exampleMiddleware } from "../middlewares/example.middleware.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 const userHandler = new Hono<AppBindings>();
-
-userHandler.get("", async ({ get, json }) => {
-  const usersDb = get("prisma").user;
-
-  return json(await userService.getAll(usersDb));
-});
 
 userHandler.post("", zValidator("json", CreateUserSchema), async ({ get, req, json, env }) => {
   const usersDb = get("prisma").user;
@@ -36,6 +31,17 @@ userHandler.post("reset-table", zValidator("json", ResetTableSchema), async ({ g
   const dto = (await req.json()) as ResetTableDto;
 
   return json(await userService.resetTable(usersDb, dto, env));
+});
+
+userHandler.use(authMiddleware());
+
+userHandler.get("", async ({ get, json }) => {
+  const usersDb = get("prisma").user;
+
+  const user = get("user");
+  console.log("current user performing action: ", user);
+
+  return json(await userService.getAll(usersDb));
 });
 
 userHandler.use(exampleMiddleware("colocated-middleware in userHandler for get user by id"));

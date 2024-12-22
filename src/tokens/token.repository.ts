@@ -5,10 +5,13 @@ type TokenGetAllProps = {
   userId: string;
 };
 
-export const getAll = async ({ tokenDb, userId }: TokenGetAllProps) => {
+const getAll = async ({ tokenDb, userId }: TokenGetAllProps) => {
   return await tokenDb.findMany({
     where: {
       userId,
+    },
+    orderBy: {
+      createdAt: "desc",
     },
   });
 };
@@ -18,7 +21,7 @@ type TokenGetPairProps = {
   tokenId: string;
 };
 
-export const getPair = async ({ tokenDb, tokenId }: TokenGetPairProps) => {
+const getPair = async ({ tokenDb, tokenId }: TokenGetPairProps) => {
   return await tokenDb.findFirst({
     where: {
       id: tokenId,
@@ -33,7 +36,7 @@ type TokenCreateProps = {
   userId: string;
 };
 
-export const create = async ({ tokenDb, token, refreshToken, userId }: TokenCreateProps) => {
+const create = async ({ tokenDb, token, refreshToken, userId }: TokenCreateProps) => {
   const tokenPair = await tokenDb.create({
     data: {
       userId,
@@ -42,7 +45,7 @@ export const create = async ({ tokenDb, token, refreshToken, userId }: TokenCrea
     },
   });
 
-  return tokenPair.id;
+  return tokenPair;
 };
 
 type TokenUpdateProps = {
@@ -52,7 +55,7 @@ type TokenUpdateProps = {
   refreshToken: string;
 };
 
-export const update = async ({ tokenDb, tokenId, token, refreshToken }: TokenUpdateProps) => {
+const update = async ({ tokenDb, tokenId, token, refreshToken }: TokenUpdateProps) => {
   return await tokenDb.update({
     where: {
       id: tokenId,
@@ -69,10 +72,25 @@ type TokenRemoveProps = {
   tokenId: string;
 };
 
-export const remove = async ({ tokenDb, tokenId }: TokenRemoveProps) => {
+const remove = async ({ tokenDb, tokenId }: TokenRemoveProps) => {
   return await tokenDb.delete({
     where: {
       id: tokenId,
+    },
+  });
+};
+
+type TokenPruneProps = {
+  tokenDb: TokenDb;
+  tokenIds: string[];
+};
+
+const prune = async ({ tokenDb, tokenIds }: TokenPruneProps) => {
+  return await tokenDb.deleteMany({
+    where: {
+      id: {
+        notIn: tokenIds,
+      },
     },
   });
 };
@@ -82,7 +100,7 @@ type TokenRemoveAllProps = {
   userId: string;
 };
 
-export const removeAll = async ({ tokenDb, userId }: TokenRemoveAllProps) => {
+const removeAll = async ({ tokenDb, userId }: TokenRemoveAllProps) => {
   return await tokenDb.deleteMany({
     where: {
       userId,
@@ -94,7 +112,7 @@ type TokenResetTableProps = {
   tokenDb: TokenDb;
 };
 
-export const resetTable = async ({ tokenDb }: TokenResetTableProps) => {
+const resetTable = async ({ tokenDb }: TokenResetTableProps) => {
   return await tokenDb.deleteMany({});
 };
 
@@ -104,6 +122,7 @@ export const tokenRepository = {
   create,
   update,
   remove,
+  prune,
   removeAll,
   resetTable,
 };

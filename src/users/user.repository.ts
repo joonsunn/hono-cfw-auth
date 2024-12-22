@@ -6,7 +6,7 @@ const getAll = async (userDb: UserDb) => {
 };
 
 const create = async (userDb: UserDb, dto: PostProcessedCreateUserDtoType) => {
-  return await userDb.create({ data: dto, omit: { hashedPassword: true } });
+  return await userDb.create({ data: dto, omit: { hashedPassword: true, id: true } });
 };
 
 const findById = async (userDb: UserDb, id: string) => {

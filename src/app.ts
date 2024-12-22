@@ -11,12 +11,20 @@ import { dbService } from "./db/db.service";
 import authHandler from "./auth/auth.handler";
 import tokenRepository from "./tokens/token.repository";
 import tokenHandler from "./tokens/token.handler";
-import { exampleMiddleware } from "./middlewares/example.middleware";
 import { authMiddleware } from "./middlewares/auth.middleware";
+import { cors } from "hono/cors";
 
 const app = new Hono<AppBindings>();
-
+app.use(envInjector());
 app.use(logger());
+app.use("*", async (c, next) => {
+  const corsMiddleware = cors({
+    origin: [c.env.FRONTEND_URL || "http://localhost:3001"],
+    allowMethods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
+    credentials: true,
+  });
+  return corsMiddleware(c, next);
+});
 
 app.onError((error, c) => {
   if (error instanceof HTTPException) {
@@ -30,8 +38,6 @@ app.notFound((c) => {
 });
 
 app.use(prisma());
-
-app.use(envInjector());
 
 app.get("/", (c) => {
   return c.text("Hello Hono!");
