@@ -19,7 +19,7 @@ app.use(envInjector());
 app.use(logger());
 app.use("*", async (c, next) => {
   const corsMiddleware = cors({
-    origin: "*", // Dynamically allow the request origin
+    origin: ["http://localhost:3001", c.env.FRONTEND_URL ?? "*"],
     allowMethods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
