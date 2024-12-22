@@ -17,15 +17,25 @@ import { cors } from "hono/cors";
 const app = new Hono<AppBindings>();
 app.use(envInjector());
 app.use(logger());
-// app.use("*", async (c, next) => {
-//   const corsMiddleware = cors({
-//     origin: (origin) => origin,
-//     allowMethods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
-//     credentials: true,
-//   });
-//   return corsMiddleware(c, next);
-// });
-app.use(cors());
+app.use("*", async (c, next) => {
+  const origin = c.req.header("Origin") || "*";
+  const corsMiddleware = cors({
+    origin: (origin) => origin, // Dynamically allow the request origin
+    allowMethods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  });
+
+  // Handle preflight requests early
+  if (c.req.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+    });
+  }
+
+  // Proceed with the middleware
+  return corsMiddleware(c, next);
+});
 
 app.onError((error, c) => {
   if (error instanceof HTTPException) {
