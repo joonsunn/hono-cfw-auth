@@ -19,7 +19,7 @@ app.use(envInjector());
 app.use(logger());
 app.use(async (c, next) => {
   const corsMiddleware = cors({
-    origin: c.env.FRONTEND_URL,
+    origin: "*",
     allowMethods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
     credentials: true,
   });
