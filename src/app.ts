@@ -17,11 +17,11 @@ import { cors } from "hono/cors";
 const app = new Hono<AppBindings>();
 app.use(envInjector());
 app.use(logger());
-app.use(async (c, next) => {
+app.use("*", async (c, next) => {
   const corsMiddleware = cors({
     origin: "*",
     allowMethods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
-    credentials: true,
+    // credentials: true,
   });
   return corsMiddleware(c, next);
 });
