@@ -20,7 +20,7 @@ app.use(logger());
 app.use("*", async (c, next) => {
   const corsMiddleware = cors({
     origin: ["http://localhost:3001", c.env.FRONTEND_URL ?? "*"],
-    allowMethods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
+    allowMethods: ["GET", "OPTIONS", "POST", "PATCH", "DELETE"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   });
