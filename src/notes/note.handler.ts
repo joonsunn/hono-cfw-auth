@@ -21,6 +21,11 @@ noteHandler.get("/byUser/:id", async ({ get, json, req }) => {
   return json(await noteService.getAllByUserPublic(noteDb, userId));
 });
 
+noteHandler.get("/public", async ({ get, json }) => {
+  const noteDb = get("prisma").note;
+  return json(await noteService.getAllPublicNotes(noteDb));
+});
+
 noteHandler.post("", zValidator("json", CreateNoteSchema), async ({ get, json, req }) => {
   const noteDb = get("prisma").note;
   const userId = get("user").sub;

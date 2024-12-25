@@ -29,6 +29,21 @@ const getAllByUserPublic = async ({ noteDb, userId }: NoteGetAllProps) => {
   });
 };
 
+type NoteGetAllPublicNotesProps = {
+  noteDb: NoteDb;
+};
+
+const getAllPublicNotes = async ({ noteDb }: NoteGetAllPublicNotesProps) => {
+  return await noteDb.findMany({
+    where: {
+      private: false,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
 const findOneById = async ({ noteDb, id }: { noteDb: NoteDb; id: string }) => {
   return await noteDb.findUnique({
     where: {
@@ -56,6 +71,7 @@ const resetTable = async ({ noteDb }: { noteDb: NoteDb }) => {
 export const noteRepository = {
   getAllBySelf,
   getAllByUserPublic,
+  getAllPublicNotes,
   findOneById,
   create,
   update,

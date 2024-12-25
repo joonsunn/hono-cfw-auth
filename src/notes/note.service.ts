@@ -14,6 +14,10 @@ const getAllByUserPublic = async (noteDb: NoteDb, userId: string) => {
   return await noteRepository.getAllByUserPublic({ noteDb, userId });
 };
 
+const getAllPublicNotes = async (noteDb: NoteDb) => {
+  return await noteRepository.getAllPublicNotes({ noteDb });
+};
+
 const findOneById = async (noteDb: NoteDb, noteId: string, user: JwtPayloadEntity) => {
   const note = await noteRepository.findOneById({ noteDb, id: noteId });
   if (!note) {
@@ -54,6 +58,7 @@ const isAllowedCheck = (note: NoteEntity, user: JwtPayloadEntity) => {
 export const noteService = {
   getAllBySelf,
   getAllByUserPublic,
+  getAllPublicNotes,
   findOneById,
   create,
   update,
