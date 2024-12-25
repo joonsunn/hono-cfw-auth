@@ -20,8 +20,7 @@ authHandler.post("/login", zValidator("json", loginSchema), async (c) => {
   setCookie(c, "token", returnObject.tokenId, {
     httpOnly: true,
     secure: true,
-    sameSite: "lax",
-    path: "/",
+    sameSite: "strict",
   });
   return json(returnObject);
 
