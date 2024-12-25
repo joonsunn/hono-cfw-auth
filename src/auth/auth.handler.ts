@@ -21,6 +21,7 @@ authHandler.post("/login", zValidator("json", loginSchema), async (c) => {
     httpOnly: true,
     secure: true,
     sameSite: "none",
+    partitioned: true,
   });
   return json(returnObject);
 
