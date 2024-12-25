@@ -7,6 +7,11 @@ import { authMiddleware } from "../middlewares/auth.middleware";
 
 const noteHandler = new Hono<AppBindings>();
 
+noteHandler.get("/public", async ({ get, json }) => {
+  const noteDb = get("prisma").note;
+  return json(await noteService.getAllPublicNotes(noteDb));
+});
+
 noteHandler.use(authMiddleware());
 
 noteHandler.get("/bySelf", async ({ get, json }) => {
@@ -19,11 +24,6 @@ noteHandler.get("/byUser/:id", async ({ get, json, req }) => {
   const noteDb = get("prisma").note;
   const userId = req.param("id");
   return json(await noteService.getAllByUserPublic(noteDb, userId));
-});
-
-noteHandler.get("/public", async ({ get, json }) => {
-  const noteDb = get("prisma").note;
-  return json(await noteService.getAllPublicNotes(noteDb));
 });
 
 noteHandler.post("", zValidator("json", CreateNoteSchema), async ({ get, json, req }) => {
