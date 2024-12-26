@@ -24,14 +24,27 @@ model User {
   email          String  @unique
   hashedPassword String
   role           ROLE
-  token          Token[]
+  tokens         Token[]
+  notes          Note[]
 }
 
 model Token {
   id           String   @id @default(uuid())
   createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
   token        String   @unique
   refreshToken String   @unique
   userId       String
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Note {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  title     String
+  content   String?
+  private   Boolean  @default(true)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

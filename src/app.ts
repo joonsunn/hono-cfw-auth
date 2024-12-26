@@ -13,13 +13,17 @@ import tokenRepository from "./tokens/token.repository";
 import tokenHandler from "./tokens/token.handler";
 import { authMiddleware } from "./middlewares/auth.middleware";
 import { cors } from "hono/cors";
+import noteHandler from "./notes/note.handler";
+import noteRepository from "./notes/note.repository";
 
 const app = new Hono<AppBindings>();
 app.use(envInjector());
 app.use(logger());
 app.use("*", async (c, next) => {
+  const allowedOrigins = [c.env.FRONTEND_URL ?? "*", c.env.FRONTEND_URL_2 ?? ""].filter((link) => link !== "");
+
   const corsMiddleware = cors({
-    origin: ["http://localhost:3001", c.env.FRONTEND_URL ?? "*"],
+    origin: ["http://localhost:3001", ...allowedOrigins],
     allowMethods: ["GET", "OPTIONS", "POST", "PATCH", "DELETE"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -48,8 +52,9 @@ app.get("/", (c) => {
 app.route("/auth", authHandler);
 app.route("/tokens", tokenHandler);
 
-app.use(authMiddleware());
+// app.use(authMiddleware());
 app.route("/users", userHandler);
+app.route("/notes", noteHandler);
 
 export default {
   fetch: app.fetch,
@@ -58,6 +63,7 @@ export default {
     const db = dbService(env);
     const userDb = db.user;
     const tokenDb = db.token;
+    const noteDb = db.note;
 
     switch (controller.cron) {
       case "0 0 * * *":
@@ -69,6 +75,9 @@ export default {
 
         console.log(`resetting token table...`);
         console.log(await tokenRepository.resetTable({ tokenDb }));
+
+        console.log(`resetting note table...`);
+        console.log(await noteRepository.resetTable({ noteDb }));
     }
     console.log("cron processed");
   },
