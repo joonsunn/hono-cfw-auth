@@ -18,6 +18,7 @@ export const NoteIdSchema = z.object({
 export const CreateNoteSchema = z.object({
   title: z.string(),
   content: z.string().optional(),
+  private: z.boolean().default(true),
 });
 
 export const UpdateNoteSchema = CreateNoteSchema.partial();

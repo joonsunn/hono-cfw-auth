@@ -4,7 +4,7 @@ import { DefaultArgs } from "@prisma/client/runtime/library";
 
 export const CreateUserSchema = z.object({
   email: z.string().email(),
-  password: z.string(),
+  password: z.string().min(8, {message: "Password must be at least 8 characters long"}),
   role: z.nativeEnum($Enums.ROLE).optional(),
   adminSecret: z.string().optional(),
 });
