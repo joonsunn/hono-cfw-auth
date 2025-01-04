@@ -4,18 +4,23 @@ import { DefaultArgs } from "@prisma/client/runtime/library";
 
 export const CreateUserSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8, {message: "Password must be at least 8 characters long"}),
+  password: z.string().min(8, { message: "Password must be at least 8 characters long" }),
   role: z.nativeEnum($Enums.ROLE).optional(),
   adminSecret: z.string().optional(),
 });
 
 export const UpdateUserSchema = z.object({
   email: z.string().email().optional(),
-  previousPassword: z.string().optional(),
-  password: z.string().optional(),
+  oldPassword: z.string().optional(),
+  newPassword: z.string().optional(),
+  newPasswordConfirm: z.string().optional(),
+  totpEnabled: z.boolean().optional(),
   role: z.nativeEnum($Enums.ROLE).optional(),
   adminSecret: z.string().optional(),
 });
+
+export type UpdateUserDtoType = z.infer<typeof UpdateUserSchema>;
+
 
 export type CreateUserDtoType = z.infer<typeof CreateUserSchema>;
 
@@ -24,7 +29,6 @@ export type PostProcessedCreateUserDtoType = Omit<CreateUserDtoType, "password">
   role: $Enums.ROLE;
 };
 
-export type UpdateUserDtoType = z.infer<typeof UpdateUserSchema>;
 
 export type PostProcessedUpdateUserDtoType = Partial<
   Omit<UpdateUserDtoType, "password" | "previousPassword"> & {

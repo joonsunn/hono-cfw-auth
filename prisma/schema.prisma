@@ -24,6 +24,9 @@ model User {
   email          String  @unique
   hashedPassword String
   role           ROLE
+  totpEnabled    Boolean @default(false)
+  totpVerified   Boolean @default(false)
+  totpSecret     String?
   tokens         Token[]
   notes          Note[]
 }

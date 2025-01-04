@@ -62,11 +62,16 @@ const update = async (userDb: UserDb, id: string, dto: UpdateUserDtoType, env: A
     ...dto,
   } as PostProcessedUpdateUserDtoType & UpdateUserDtoType;
 
-  if (dto.password) {
-    if (!dto.previousPassword || !(await compareHash(dto.previousPassword, existingUser.hashedPassword))) {
-      throw new UnauthorizedException("Unauthorized change of password");
+  if (dto.oldPassword) {
+    if (!dto.oldPassword || !(await compareHash(dto.oldPassword, existingUser.hashedPassword))) {
+      throw new BadRequestException("Invalid credentials provided. Unable to proceed with user update.");
     }
-    newDto.hashedPassword = await createHashedString(dto.password);
+    if (dto.newPassword) {
+      if (dto.newPassword !== dto.newPasswordConfirm) {
+        throw new BadRequestException("New password and confirm password do not match");
+      }
+      newDto.hashedPassword = await createHashedString(dto.newPassword);
+    }
   }
 
   if (dto.role && dto.role !== existingUser.role) {
@@ -74,8 +79,9 @@ const update = async (userDb: UserDb, id: string, dto: UpdateUserDtoType, env: A
   }
 
   try {
-    delete newDto.password;
-    delete newDto.previousPassword;
+    delete newDto.oldPassword;
+    delete newDto.newPassword;
+    delete newDto.newPasswordConfirm;
     delete newDto.adminSecret;
     return await userRepository.update(userDb, id, newDto);
   } catch (error) {
