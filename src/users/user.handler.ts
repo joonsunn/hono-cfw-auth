@@ -15,6 +15,7 @@ import userService from "./user.service.js";
 import { exampleMiddleware } from "../middlewares/example.middleware.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 
+// /users
 const userHandler = new Hono<AppBindings>();
 
 userHandler.post("", zValidator("json", CreateUserSchema), async ({ get, req, json, env }) => {

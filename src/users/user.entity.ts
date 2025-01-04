@@ -7,6 +7,9 @@ export class UserEntity implements User {
   email!: string;
   hashedPassword!: string;
   role!: $Enums.ROLE;
+  totpEnabled!: boolean;
+  totpSecret!: string | null;
+  totpVerified!: boolean;
 
   tokens?: TokenEntity[];
   notes?: NoteEntity[];
