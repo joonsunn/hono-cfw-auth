@@ -10,6 +10,10 @@ import {
 } from "./user.dto";
 import userRepository from "./user.repository";
 import { BadRequestException, NotFoundException, UnauthorizedException } from "../libs/errors";
+import authService from "../auth/auth.service";
+import { ResponseUserType, UserEntity } from "./user.entity";
+import { authenticator } from "otplib";
+import qrService from "../qr/qr.service";
 
 const getAll = async (userDb: UserDb) => {
   return await userRepository.getAll(userDb);
@@ -55,7 +59,12 @@ const create = async (userDb: UserDb, dto: CreateUserDtoType, env: AppBindings["
   }
 };
 
-const update = async (userDb: UserDb, id: string, dto: UpdateUserDtoType, env: AppBindings["Bindings"]) => {
+const update = async (
+  userDb: UserDb,
+  id: string,
+  dto: UpdateUserDtoType,
+  env: AppBindings["Bindings"]
+): Promise<ResponseUserType> => {
   const existingUser = await adminGetById(userDb, id);
 
   const newDto = {
@@ -78,12 +87,24 @@ const update = async (userDb: UserDb, id: string, dto: UpdateUserDtoType, env: A
     newDto.role = (await assignRoleBasedOnSecret(newDto.adminSecret, env.ADMIN_SIGNUP_SECRET)) ?? "USER";
   }
 
+  if (existingUser.totpEnabled === true && newDto.totpEnabled === false) {
+    newDto.totpSecret = null;
+    newDto.totpVerified = false;
+  }
+
   try {
     delete newDto.oldPassword;
     delete newDto.newPassword;
     delete newDto.newPasswordConfirm;
     delete newDto.adminSecret;
-    return await userRepository.update(userDb, id, newDto);
+
+    await userRepository.update(userDb, id, newDto);
+
+    if (existingUser.totpEnabled !== newDto.totpEnabled && newDto.totpEnabled) {
+      await authService.generateTotpSecret({ usersDb: userDb, userId: id, env });
+    }
+
+    return await getById(userDb, id);
   } catch (error) {
     throw new BadRequestException(`Bad request: ${JSON.stringify(error, null, 2)}`);
   }
@@ -112,6 +133,19 @@ const resetTable = async (userDb: UserDb, dto: ResetTableDto, env: AppBindings["
   }
 };
 
+export const retrieveTotpQr = async ({ usersDb, userId }: { usersDb: UserDb; userId: string }) => {
+  const service = "hono-app";
+
+  const userById = await userService.getById(usersDb, userId);
+  const user = await userService.adminGetByEmail(usersDb, userById.email);
+  if (!user.totpSecret) {
+    throw new BadRequestException(`Totp not applicable for user ${user.email}`);
+  }
+  const otpauth = authenticator.keyuri(user.email, service, user.totpSecret);
+
+  return await qrService.generateQr(otpauth);
+};
+
 export const userService = {
   getAll,
   getById,
@@ -120,6 +154,7 @@ export const userService = {
   update,
   remove,
   resetTable,
+  retrieveTotpQr,
 };
 
 export default userService;
