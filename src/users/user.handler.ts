@@ -14,6 +14,9 @@ import { AppBindings } from "../types.js";
 import userService from "./user.service.js";
 import { exampleMiddleware } from "../middlewares/example.middleware.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { getCookie } from "hono/cookie";
+import { UnauthorizedException } from "../libs/errors.js";
+import authService from "../auth/auth.service.js";
 
 // /users
 const userHandler = new Hono<AppBindings>();
@@ -70,6 +73,28 @@ userHandler.delete(":id", zValidator("param", userParamSchema), async ({ get, re
   const usersDb = get("prisma").user;
   const id = req.param("id");
   return json(await userService.remove(usersDb, id));
+});
+
+userHandler.get(":id/totpQr", async (c) => {
+  const { get } = c;
+  const userId = get("user").sub;
+  return await userService.retrieveTotpQr({ usersDb: get("prisma").user, userId });
+});
+
+userHandler.post("/verify-totp", async (c) => {
+  const { get, req, json, env } = c;
+
+  const usersDb = get("prisma").user;
+
+  const dto = await req.json();
+
+  const userId = get("user").sub;
+
+  const response = await authService.verifyTotp({ usersDb, userId, code: dto.code });
+
+  await userService.update(usersDb, userId, { totpVerified: true }, env);
+
+  return json(response);
 });
 
 export default userHandler;

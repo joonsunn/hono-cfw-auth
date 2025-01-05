@@ -14,3 +14,5 @@ export class UserEntity implements User {
   tokens?: TokenEntity[];
   notes?: NoteEntity[];
 }
+
+export type ResponseUserType = Omit<UserEntity, "hashedPassword" | "totpSecret">;

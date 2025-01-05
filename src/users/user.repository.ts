@@ -1,16 +1,21 @@
 import { PostProcessedCreateUserDtoType, PostProcessedUpdateUserDtoType, UserDb } from "./user.dto";
 import { UserEntity } from "./user.entity";
 
+const omit = {
+  hashedPassword: true,
+  totpSecret: true
+}
+
 const getAll = async (userDb: UserDb) => {
-  return (await userDb.findMany({ omit: { hashedPassword: true } })) as UserEntity[];
+  return (await userDb.findMany({ omit })) as UserEntity[];
 };
 
 const create = async (userDb: UserDb, dto: PostProcessedCreateUserDtoType) => {
-  return await userDb.create({ data: dto, omit: { hashedPassword: true, id: true } });
+  return await userDb.create({ data: dto, omit });
 };
 
 const findById = async (userDb: UserDb, id: string) => {
-  return await userDb.findUnique({ where: { id }, omit: { hashedPassword: true } });
+  return await userDb.findUnique({ where: { id }, omit });
 };
 
 const adminFindById = async (userDb: UserDb, id: string) => {
@@ -22,11 +27,11 @@ const adminFindByEmail = async (userDb: UserDb, email: string) => {
 };
 
 const update = async (userDb: UserDb, id: string, dto: PostProcessedUpdateUserDtoType) => {
-  return await userDb.update({ where: { id }, data: dto, omit: { hashedPassword: true } });
+  return await userDb.update({ where: { id }, data: dto, omit });
 };
 
 const remove = async (userDb: UserDb, id: string) => {
-  return await userDb.delete({ where: { id }, omit: { hashedPassword: true } });
+  return await userDb.delete({ where: { id }, omit });
 };
 
 const resetTable = async (userDb: UserDb) => {

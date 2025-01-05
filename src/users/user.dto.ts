@@ -14,13 +14,14 @@ export const UpdateUserSchema = z.object({
   oldPassword: z.string().optional(),
   newPassword: z.string().optional(),
   newPasswordConfirm: z.string().optional(),
+  totpSecret: z.string().optional().nullable(),
   totpEnabled: z.boolean().optional(),
+  totpVerified: z.boolean().optional(),
   role: z.nativeEnum($Enums.ROLE).optional(),
   adminSecret: z.string().optional(),
 });
 
 export type UpdateUserDtoType = z.infer<typeof UpdateUserSchema>;
-
 
 export type CreateUserDtoType = z.infer<typeof CreateUserSchema>;
 
@@ -28,7 +29,6 @@ export type PostProcessedCreateUserDtoType = Omit<CreateUserDtoType, "password">
   hashedPassword: string;
   role: $Enums.ROLE;
 };
-
 
 export type PostProcessedUpdateUserDtoType = Partial<
   Omit<UpdateUserDtoType, "password" | "previousPassword"> & {
