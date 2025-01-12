@@ -1,3 +1,4 @@
+import configService from "../config/config.service";
 import { compareHash } from "../libs/crypto";
 import { BadRequestException, UnauthorizedException } from "../libs/errors";
 import qrService from "../qr/qr.service";
@@ -6,8 +7,10 @@ import tokenService from "../tokens/token.service";
 import { AppBindings } from "../types";
 import { UpdateUserDtoType, UserDb } from "../users/user.dto";
 import userService from "../users/user.service";
-import { LoginDtoType, TotpLoginDtoType } from "./auth.dto";
+import { LoginDtoType, TotpLoginDtoType, TwoFaLoginDtoType } from "./auth.dto";
 import { authenticator } from "otplib";
+
+authenticator.options = configService.authenticatorOptions;
 
 type LoginProps = {
   usersDb: UserDb;
@@ -41,6 +44,27 @@ export const totpLogin = async ({ usersDb, tokenDb, dto, env }: totpLoginProps) 
 
   const approved = await authService.verifyTotp({ usersDb, userId: user.id, code: dto.code });
   if (!approved) {
+    throw new BadRequestException("Invalid credentials");
+  }
+
+  const tokenId = await tokenService.create(tokenDb, { userId: user.id, role: user.role }, env);
+
+  return { id: user.id, email: user.email, role: user.role, tokenId };
+};
+
+type twoFaLoginProps = {
+  usersDb: UserDb;
+  tokenDb: TokenDb;
+  dto: TwoFaLoginDtoType;
+  env: AppBindings["Bindings"];
+};
+
+export const twoFaLogin = async ({ usersDb, tokenDb, dto, env }: twoFaLoginProps) => {
+  const user = await userService.adminGetByEmail(usersDb, dto.email);
+  const passwordOk = await compareHash(dto.password, user.hashedPassword);
+
+  const totpOk = await authService.verifyTotp({ usersDb, userId: user.id, code: dto.code });
+  if (!passwordOk || !totpOk) {
     throw new BadRequestException("Invalid credentials");
   }
 
@@ -98,6 +122,7 @@ export const verifyTotp = async ({ usersDb, userId, code }: { usersDb: UserDb; u
 export const authService = {
   login,
   logout,
+  twoFaLogin,
   generateTotpSecret,
   verifyTotp,
   totpLogin,

@@ -37,6 +37,12 @@ userHandler.post("reset-table", zValidator("json", ResetTableSchema), async ({ g
   return json(await userService.resetTable(usersDb, dto, env));
 });
 
+userHandler.get("byEmail/:email", async ({ get, req, json }) => {
+  const usersDb = get("prisma").user;
+  const email = req.param("email");
+  return json(await userService.getByEmail(usersDb, email));
+});
+
 userHandler.use(authMiddleware());
 
 userHandler.get("", async ({ get, json }) => {
