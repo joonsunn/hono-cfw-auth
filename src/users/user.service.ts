@@ -27,6 +27,14 @@ const getById = async (userDb: UserDb, id: string) => {
   return user;
 };
 
+const getByEmail = async (userDb: UserDb, email: string) => {
+  const user = await userRepository.findByEmail(userDb, email);
+  if (!user) {
+    throw new NotFoundException(`User with email ${email} not found`);
+  }
+  return user;
+};
+
 const adminGetById = async (userDb: UserDb, id: string) => {
   const user = await userRepository.adminFindById(userDb, id);
   if (!user) {
@@ -149,6 +157,7 @@ export const retrieveTotpQr = async ({ usersDb, userId }: { usersDb: UserDb; use
 export const userService = {
   getAll,
   getById,
+  getByEmail,
   adminGetByEmail,
   create,
   update,

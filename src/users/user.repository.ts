@@ -3,8 +3,8 @@ import { UserEntity } from "./user.entity";
 
 const omit = {
   hashedPassword: true,
-  totpSecret: true
-}
+  totpSecret: true,
+};
 
 const getAll = async (userDb: UserDb) => {
   return (await userDb.findMany({ omit })) as UserEntity[];
@@ -16,6 +16,10 @@ const create = async (userDb: UserDb, dto: PostProcessedCreateUserDtoType) => {
 
 const findById = async (userDb: UserDb, id: string) => {
   return await userDb.findUnique({ where: { id }, omit });
+};
+
+const findByEmail = async (userDb: UserDb, email: string) => {
+  return await userDb.findUnique({ where: { email }, omit });
 };
 
 const adminFindById = async (userDb: UserDb, id: string) => {
@@ -48,6 +52,7 @@ export const userRepository = {
   adminFindById,
   adminFindByEmail,
   findById,
+  findByEmail,
   update,
   remove,
   resetTable,

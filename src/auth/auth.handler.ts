@@ -1,7 +1,14 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { AppBindings } from "../types";
-import { LoginDtoType, loginSchema, TotpLoginDtoType, totpLoginSchema } from "./auth.dto";
+import {
+  LoginDtoType,
+  loginSchema,
+  TotpLoginDtoType,
+  totpLoginSchema,
+  TwoFaLoginDtoType,
+  TwoFaLoginSchema,
+} from "./auth.dto";
 import { UnauthorizedException } from "../libs/errors";
 import authService from "./auth.service";
 import { getCookie, setCookie, deleteCookie } from "hono/cookie";
@@ -24,8 +31,6 @@ authHandler.post("/login", zValidator("json", loginSchema), async (c) => {
     partitioned: true,
   });
   return json(returnObject);
-
-  // return json(await authService.login({ usersDb, tokenDb, dto, env }));
 });
 
 authHandler.post("/totp-login", zValidator("json", totpLoginSchema), async (c) => {
@@ -44,8 +49,24 @@ authHandler.post("/totp-login", zValidator("json", totpLoginSchema), async (c) =
     partitioned: true,
   });
   return json(returnObject);
+});
 
-  // return json(await authService.login({ usersDb, tokenDb, dto, env }));
+authHandler.post("/twoFa-login", zValidator("json", TwoFaLoginSchema), async (c) => {
+  const { get, req, json, env } = c;
+
+  const usersDb = get("prisma").user;
+  const tokenDb = get("prisma").token;
+
+  const dto = (await req.json()) as TwoFaLoginDtoType;
+
+  const returnObject = await authService.twoFaLogin({ usersDb, tokenDb, dto, env });
+  setCookie(c, "token", returnObject.tokenId, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    partitioned: true,
+  });
+  return json(returnObject);
 });
 
 authHandler.post("/logout", async (c) => {
