@@ -82,9 +82,9 @@ userHandler.delete(":id", zValidator("param", userParamSchema), async ({ get, re
 });
 
 userHandler.get(":id/totpQr", async (c) => {
-  const { get } = c;
+  const { get, json } = c;
   const userId = get("user").sub;
-  return await userService.retrieveTotpQr({ usersDb: get("prisma").user, userId });
+  return json(await userService.retrieveTotpQr({ usersDb: get("prisma").user, userId }));
 });
 
 userHandler.post("/verify-totp", async (c) => {
