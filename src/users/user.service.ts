@@ -151,7 +151,14 @@ export const retrieveTotpQr = async ({ usersDb, userId }: { usersDb: UserDb; use
   }
   const otpauth = authenticator.keyuri(user.email, service, user.totpSecret);
 
-  return await qrService.generateQr(otpauth);
+  const qrUri = await qrService.generateQrUri(otpauth);
+
+  const dataToReturn = {
+    qr: qrUri,
+    totpSecret: user.totpSecret,
+  };
+
+  return dataToReturn;
 };
 
 export const userService = {
